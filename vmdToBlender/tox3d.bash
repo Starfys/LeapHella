@@ -1,0 +1,1 @@
+vmd bound.pdb -args ~/ttt.x3d < modifier.tcl
