@@ -18,7 +18,14 @@ namespace Leap.PinchUtility {
     [SerializeField]
     protected float _deactivatePinchDist = 0.04f;
 
+    [SerializeField]
+    protected float _activateGrabStrength = 0.8f;
+
+    [SerializeField]
+    protected float _deactivateGrabStrength = 0.4f;
+
     protected bool _isPinching = false;
+    protected bool _isMakingFist = false;
     protected bool _didChange = false;
 
     protected float _lastPinchTime = 0.0f;
@@ -26,6 +33,8 @@ namespace Leap.PinchUtility {
 
     protected Vector3 _pinchPos;
     protected Quaternion _pinchRotation;
+    protected Vector3 _fistPos;
+    protected Vector3 _fistRotation;
 
     protected virtual void OnValidate() {
       if (_handModel == null) {
@@ -55,6 +64,15 @@ namespace Leap.PinchUtility {
       get {
         return _isPinching;
       }
+    }
+
+    /// <summary>
+    /// Returns whether or not the dectector is currently detecting a pinch.
+    /// </summary>
+    public bool IsMakingFist {
+        get {
+            return _isMakingFist;
+        }
     }
 
     /// <summary>
@@ -127,9 +145,9 @@ namespace Leap.PinchUtility {
       _didChange = false;
 
       Hand hand = _handModel.GetLeapHand();
-
       if (hand == null || !_handModel.IsTracked) {
         changePinchState(false);
+        _isMakingFist = false;
         return;
       }
 
@@ -147,6 +165,19 @@ namespace Leap.PinchUtility {
       }
       transform.position /= 2.0f;
 
+    //Handle fist
+    if (_isMakingFist) {
+        if (hand.GrabStrength < _deactivateGrabStrength) {
+            _isMakingFist = false;
+        }
+    } else {
+        if (hand.GrabStrength > _activateGrabStrength) {
+            _isMakingFist = true;
+        }
+    }
+        
+
+
       if (_isPinching) {
         if (pinchDistance > _deactivatePinchDist) {
           changePinchState(false);
@@ -162,6 +193,8 @@ namespace Leap.PinchUtility {
         _pinchPos = transform.position;
         _pinchRotation = transform.rotation;
       }
+    
+
     }
 
     protected virtual void changePinchState(bool shouldBePinching) {

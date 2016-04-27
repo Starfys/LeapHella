@@ -29,6 +29,7 @@ namespace Leap.PinchUtility {
         enabled = false;
       }
 			currentlyPinching = false;
+
     }
 
     void Update() {
